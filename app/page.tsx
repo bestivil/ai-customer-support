@@ -35,6 +35,7 @@ export default function Home() {
       setMessages((messages) => [
         ...messages,
         { role: "user", content: newMsg || "" },
+        { role: "assistant", content: "" },
       ]);
     } catch {
       throw new Error("Unable to append chat");

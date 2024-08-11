@@ -35,11 +35,11 @@ export default async function OpenAI_POST({
             const text = decoder.decode(value || new Uint8Array(), {
               stream: true,
             });
-            result.concat(text);
+            let lastMsg = messages[messages.length - 1];
 
             setMessages([
               ...messages,
-              { role: "assistant", content: result }, // New message
+              { ...lastMsg, content: lastMsg.content.concat(text) },
             ]);
           }
         }
