@@ -6,7 +6,7 @@ const systemPrompts =
   "You are an AI-powered chatbot where you help students with Leetcode sytle interview questions.";
 
 export async function POST(req: Response) {
-  const openai = new OpenAI();
+  const openai = new OpenAI({ apiKey: process.env.NEXT_PUBLIC_API_KEY });
   const data = await req.json();
 
   const completion = await openai.chat.completions.create({

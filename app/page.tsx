@@ -7,6 +7,9 @@ import { useState } from "react";
 import { Panels } from "./_components/panel";
 import { Box_Shadcn } from "./_components/box_shadcn";
 import { Button } from "@/components/ui/button";
+import OpenAI_POST from "./backend/send_msg";
+import { stringify } from "querystring";
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
   const [models, setModels] = useState([
@@ -14,17 +17,34 @@ export default function Home() {
     { name: "Claude", active: false },
   ]);
 
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: "Hi, welcome to the AI chatbot, how can I help you today?",
-    },
-  ]);
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>(
+    [
+      {
+        role: "assistant",
+        content: "Hi, welcome to the AI chatbot, how can I help you today?",
+      },
+    ]
+  );
 
   const [newMsg, setNewMsg] = useState<string>();
+  const [isLoading, setLoading] = useState<boolean>(false);
 
   function handleSendMsg() {
+    setLoading(true);
+    try {
+      setMessages((messages) => [
+        ...messages,
+        { role: "user", content: newMsg || "" },
+      ]);
+    } catch {
+      throw new Error("Unable to append chat");
+    } finally {
+      OpenAI_POST({ messages, setMessages });
+    }
+
     setNewMsg("");
+
+    setTimeout(() => setLoading(false), 3000); //TODO: artificial
   }
 
   return (
@@ -37,8 +57,9 @@ export default function Home() {
 
       <Panels />
       <Box_Shadcn />
+
       {messages.map((item, index) => (
-        <BaseCard msg={item} cn={"flex mx-[10px]"} />
+        <BaseCard msg={item} cn={"flex mx-[10px] mt-2"} />
       ))}
 
       <Textarea
@@ -47,8 +68,7 @@ export default function Home() {
         className="mt-4"
       />
       <Button onClick={handleSendMsg} className="mt-4 mx-4 w-full">
-        {/* TODO: implement loading state */}
-        Send
+        {isLoading ? <Loader2 className="animate-spin" /> : "Send"}
       </Button>
     </div>
   );

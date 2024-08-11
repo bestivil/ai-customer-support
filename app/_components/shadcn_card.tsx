@@ -44,10 +44,10 @@ export function BaseCard({
     <div
       className={cn.concat(
         " ",
-        msg.role == "assistant" ? "justify-end" : "justify-start"
+        msg.role == "assistant" ? "md:justify-end" : "justify-start"
       )}
     >
-      <Card className="w-[30%]">
+      <Card className="">
         <CardHeader className="justify-between flex flex-row">
           <CardContent>
             <p>{msg.content}</p>
