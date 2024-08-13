@@ -5,13 +5,13 @@ import {
 } from "@tanstack/react-query";
 import { useState } from "react";
 
-export default async function OpenAI_POST({
+export const OpenAI_POST = ({
   messages,
   setMessages,
 }: {
   messages: { role: string; content: string }[];
   setMessages: (array: { role: string; content: string }[]) => void;
-}) {
+}) => {
   const headers = { "Content-Type": "application/json" };
   const { isPending, error, data } = useQuery({
     queryKey: ["repoData"],
@@ -46,5 +46,5 @@ export default async function OpenAI_POST({
       }),
   });
 
-  if (error) return "Error occured:" + error.message;
-}
+  if (error) console.log("Error occured:" + error.message);
+};

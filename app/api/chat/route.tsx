@@ -5,9 +5,11 @@ import { OpenAI } from "openai";
 const systemPrompts =
   "You are an AI-powered chatbot where you help students with Leetcode sytle interview questions.";
 
-export async function POST(req: Response) {
-  const openai = new OpenAI({ apiKey: process.env.NEXT_PUBLIC_API_KEY });
+export async function POST(req: Request) {
+  const openai = new OpenAI();
   const data = await req.json();
+
+  console.log("working");
 
   const completion = await openai.chat.completions.create({
     messages: [{ role: "system", content: systemPrompts }, ...data],
@@ -30,7 +32,7 @@ export async function POST(req: Response) {
           }
         }
       } catch {
-        controller.error(new Error("Failed streaming"));
+        controller.error("Failed streaming");
       } finally {
         controller.close();
       }

@@ -7,9 +7,9 @@ import { useState } from "react";
 import { Panels } from "./_components/panel";
 import { Box_Shadcn } from "./_components/box_shadcn";
 import { Button } from "@/components/ui/button";
-import OpenAI_POST from "./backend/send_msg";
-import { stringify } from "querystring";
+// import { useOpenAI } from "./backend/send_msg";
 import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
   const [models, setModels] = useState([
@@ -29,6 +29,46 @@ export default function Home() {
   const [newMsg, setNewMsg] = useState<string>();
   const [isLoading, setLoading] = useState<boolean>(false);
 
+  const sendMessage = async () => {
+    if (!newMsg?.trim() || isLoading) return;
+
+    setNewMsg("");
+
+    const headers = { "Content-Type": "application/json" };
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers,
+        body: JSON.stringify([...messages, { role: "user", content: newMsg }]), // future ref: crucial to append correct body details to api call, else routes don't redirect coorectly
+      }).then(async (res) => {
+        if (res.body) {
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let result = "";
+          return reader.read().then(function processText({ done, value }) {
+            if (done) {
+              return result;
+            }
+            const text = decoder.decode(value || new Uint8Array(), {
+              stream: true,
+            });
+            setMessages((messages) => {
+              let lastMessage = messages[messages.length - 1];
+              let otherMessages = messages.slice(0, messages.length - 1);
+              return [
+                ...otherMessages,
+                { ...lastMessage, content: lastMessage.content + text },
+              ];
+            });
+            return reader.read().then(processText);
+          });
+        }
+      });
+    } catch {}
+    setLoading(false);
+  };
+
   function handleSendMsg() {
     setLoading(true);
     try {
@@ -40,12 +80,10 @@ export default function Home() {
     } catch {
       throw new Error("Unable to append chat");
     } finally {
-      OpenAI_POST({ messages, setMessages });
+      sendMessage();
     }
 
     setNewMsg("");
-
-    setTimeout(() => setLoading(false), 3000); //TODO: artificial
   }
 
   return (
