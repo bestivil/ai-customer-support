@@ -35,7 +35,6 @@ export default function Home() {
   const [newMsg, setNewMsg] = useState<string>();
   const [isLoading, setLoading] = useState<boolean>(false);
   const [res, setResponse] = useState<any>();
-  const [toast, showToast] = useState(false);
 
   const sendMessage = async () => {
     if (!newMsg?.trim() || isLoading) return;
@@ -79,7 +78,6 @@ export default function Home() {
         let lastMessage = messages[messages.length - 1];
         return [{ ...lastMessage, content: lastMessage.content + "" }];
       });
-      showToast(true);
     }
 
     setLoading(false);
@@ -93,8 +91,6 @@ export default function Home() {
         { role: "user", content: newMsg || "" },
         { role: "assistant", content: "" },
       ]);
-
-      setNewMsg("");
     } catch {
       throw new Error("Unable to append chat");
     } finally {
