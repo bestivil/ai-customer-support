@@ -2,7 +2,7 @@
 
 import { Textarea } from "@/components/ui/textarea";
 import SelectCard, { BaseCard } from "./elements/shadcn_card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import {
@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/resizable";
 
 import { dformat } from "./util/datetime";
+import { store } from "./util/storage";
+import localforage from "localforage";
 
 export default function Home() {
   const [models, setModels] = useState([
@@ -20,6 +22,7 @@ export default function Home() {
   ]);
 
   const [newMsg, setNewMsg] = useState<string>();
+  const [chatDate, setChatDate] = useState<any>();
   const [isLoading, setLoading] = useState<boolean>(false);
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     [
@@ -29,6 +32,12 @@ export default function Home() {
       },
     ]
   );
+
+  useEffect(() => {
+    setChatDate(dformat);
+  }, []);
+
+  useEffect(() => {});
 
   const sendMessage = async () => {
     const res = await fetch("/api/chat", {
@@ -111,7 +120,7 @@ export default function Home() {
               <BaseCard
                 cn={"mt-3 top-0 "}
                 size=" bg-slate-100 w-fit h-16 font-bold"
-                msg={{ content: dformat }}
+                msg={{ content: chatDate }}
               />
             </div>
             <div className="flex-1 overflow-y-auto">
