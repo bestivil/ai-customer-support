@@ -1,12 +1,21 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import SelectCard, { BaseCard } from "./_components/shadcn_card";
+import SelectCard, { BaseCard } from "./elements/shadcn_card";
 import { useState } from "react";
-import { Panels } from "./_components/panel";
-import { Box_Shadcn } from "./_components/box_shadcn";
+import { Panels } from "./elements/panel";
+import { Box_Shadcn } from "./elements/box_shadcn";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
+
+import { dformat } from "./util/datetime";
+import { ErrorToast } from "./util/error_message";
+import { ToastContainer } from "react-toastify";
 
 export default function Home() {
   const [models, setModels] = useState([
@@ -26,6 +35,7 @@ export default function Home() {
   const [newMsg, setNewMsg] = useState<string>();
   const [isLoading, setLoading] = useState<boolean>(false);
   const [res, setResponse] = useState<any>();
+  const [toast, showToast] = useState(false);
 
   const sendMessage = async () => {
     if (!newMsg?.trim() || isLoading) return;
@@ -41,7 +51,7 @@ export default function Home() {
       setResponse(res);
     } catch {}
 
-    if (res.body) {
+    if (res) {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let result = "";
@@ -64,6 +74,12 @@ export default function Home() {
           });
           return reader.read().then(processText);
         });
+    } else {
+      setMessages(() => {
+        let lastMessage = messages[messages.length - 1];
+        return [{ ...lastMessage, content: lastMessage.content + "" }];
+      });
+      showToast(true);
     }
 
     setLoading(false);
@@ -96,21 +112,44 @@ export default function Home() {
         ))}
       </div>
 
-      <Panels />
-      <Box_Shadcn />
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="min-h-[600px] m-4 max-w-[95%] rounded-lg border"
+      >
+        <ResizablePanel defaultSize={25}>
+          <div className="flex flex-col h-full items-center justify-start p-6">
+            <div className="font-semibold">Chat History</div>
+          </div>
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={75}>
+          <div className="flex flex-col h-full p-2 ">
+            <div className="mb-8">
+              <BaseCard
+                cn={"mt-3 top-0"}
+                size=" bg-slate-100 w-fit h-16 font-bold"
+                msg={{ content: dformat }}
+              />
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {messages.map((item, index) => (
+                <BaseCard key={index} msg={item} cn={"flex mx-[10px] mt-2"} />
+              ))}
+            </div>
 
-      {messages.map((item, index) => (
-        <BaseCard msg={item} cn={"flex mx-[10px] mt-2"} />
-      ))}
-
-      <Textarea
-        value={newMsg}
-        onChange={(e) => setNewMsg(e.target.value)}
-        className="mt-4"
-      />
-      <Button onClick={handleSendMsg} className="mt-4 mx-4 w-full">
-        {isLoading ? <Loader2 className="animate-spin" /> : "Send"}
-      </Button>
+            <div className="sticky bottom-0 left-0 w-full bg-white p-4 ">
+              <Textarea
+                value={newMsg}
+                onChange={(e) => setNewMsg(e.target.value)}
+                className="mb-4"
+              />
+              <Button onClick={handleSendMsg} className="w-full">
+                {isLoading ? <Loader2 className="animate-spin" /> : "Send"}
+              </Button>
+            </div>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

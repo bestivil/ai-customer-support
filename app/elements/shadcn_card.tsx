@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { dformat } from "../util/datetime";
 
 interface Model {
   name: string;
@@ -20,7 +21,7 @@ export default function SelectCard({
   setModels,
 }: {
   models: { name: string; active: boolean };
-  setModels: React.Dispatch<React.SetStateAction<Model[]>>; // function ret new model based on old model
+  setModels: React.Dispatch<React.SetStateAction<Model[]>>; // function returns new model based on old model
 }) {
   const handleClick = () => {
     setModels((prevModels: Model[]) =>
@@ -35,7 +36,7 @@ export default function SelectCard({
   return (
     <Card className="w-[350px]">
       <CardHeader className="justify-between flex flex-row">
-        <CardTitle> {models.name}</CardTitle>
+        <CardTitle> {models.name} </CardTitle>
         <Button
           disabled={models.active}
           variant={models.active ? "default" : "outline"}
@@ -51,9 +52,11 @@ export default function SelectCard({
 export function BaseCard({
   cn,
   msg,
+  size,
 }: {
   cn: string;
-  msg: { role: string; content: string };
+  msg: { role?: string; content: string };
+  size?: string;
 }) {
   return (
     <div
@@ -62,7 +65,7 @@ export function BaseCard({
         msg.role == "assistant" ? "md:justify-end" : "justify-start"
       )}
     >
-      <Card className="">
+      <Card className={size}>
         <CardHeader className="justify-between flex flex-row">
           <CardContent>
             <p>{msg.content}</p>
