@@ -10,13 +10,28 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+interface Model {
+  name: string;
+  active: boolean;
+}
+
 export default function SelectCard({
   models,
-}: //   setModels,
-{
+  setModels,
+}: {
   models: { name: string; active: boolean };
-  //   setModels: (event: boolean) => void;
+  setModels: React.Dispatch<React.SetStateAction<Model[]>>; // function ret new model based on old model
 }) {
+  const handleClick = () => {
+    setModels((prevModels: Model[]) =>
+      prevModels.map((model: { name: any; active: any }) =>
+        model.name === models.name
+          ? { ...model, active: true }
+          : { ...model, active: false }
+      )
+    );
+  };
+
   return (
     <Card className="w-[350px]">
       <CardHeader className="justify-between flex flex-row">
@@ -24,7 +39,7 @@ export default function SelectCard({
         <Button
           disabled={models.active}
           variant={models.active ? "default" : "outline"}
-          //   onClick={handleClick}
+          onClick={handleClick}
         >
           {models.active ? "Selected" : "Select"}
         </Button>

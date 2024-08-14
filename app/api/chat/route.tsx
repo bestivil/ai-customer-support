@@ -5,11 +5,9 @@ import { OpenAI } from "openai";
 const systemPrompts =
   "You are an AI-powered chatbot where you help students with Leetcode sytle interview questions.";
 
-export async function POST(req: Request) {
+export async function POST(req: Response) {
   const openai = new OpenAI();
   const data = await req.json();
-
-  console.log("working");
 
   const completion = await openai.chat.completions.create({
     messages: [{ role: "system", content: systemPrompts }, ...data],

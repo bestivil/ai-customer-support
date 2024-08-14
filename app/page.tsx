@@ -1,15 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
 import SelectCard, { BaseCard } from "./_components/shadcn_card";
 import { useState } from "react";
 import { Panels } from "./_components/panel";
 import { Box_Shadcn } from "./_components/box_shadcn";
 import { Button } from "@/components/ui/button";
-// import { useOpenAI } from "./backend/send_msg";
 import { Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
   const [models, setModels] = useState([
@@ -28,44 +25,47 @@ export default function Home() {
 
   const [newMsg, setNewMsg] = useState<string>();
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [res, setResponse] = useState<any>();
 
   const sendMessage = async () => {
     if (!newMsg?.trim() || isLoading) return;
 
-    setNewMsg("");
-
     const headers = { "Content-Type": "application/json" };
 
     try {
-      const response = await fetch("/api/chat", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers,
         body: JSON.stringify([...messages, { role: "user", content: newMsg }]), // future ref: crucial to append correct body details to api call, else routes don't redirect coorectly
-      }).then(async (res) => {
-        if (res.body) {
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          let result = "";
-          return reader.read().then(function processText({ done, value }) {
-            if (done) {
-              return result;
-            }
-            const text = decoder.decode(value || new Uint8Array(), {
-              stream: true,
-            });
-            setMessages((messages) => {
-              let lastMessage = messages[messages.length - 1];
-              let otherMessages = messages.slice(0, messages.length - 1);
-              return [
-                ...otherMessages,
-                { ...lastMessage, content: lastMessage.content + text },
-              ];
-            });
-            return reader.read().then(processText);
-          });
-        }
       });
+      setResponse(res);
     } catch {}
+
+    if (res.body) {
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let result = "";
+      return reader
+        .read()
+        .then(function processText({ done, value }: { done: any; value: any }) {
+          if (done) {
+            return result;
+          }
+          const text = decoder.decode(value || new Uint8Array(), {
+            stream: true,
+          });
+          setMessages((messages) => {
+            let lastMessage = messages[messages.length - 1];
+            let otherMessages = messages.slice(0, messages.length - 1);
+            return [
+              ...otherMessages,
+              { ...lastMessage, content: lastMessage.content + text },
+            ];
+          });
+          return reader.read().then(processText);
+        });
+    }
+
     setLoading(false);
   };
 
@@ -77,6 +77,8 @@ export default function Home() {
         { role: "user", content: newMsg || "" },
         { role: "assistant", content: "" },
       ]);
+
+      setNewMsg("");
     } catch {
       throw new Error("Unable to append chat");
     } finally {
@@ -90,7 +92,7 @@ export default function Home() {
     <div className="">
       <div className="flex md:flex-row flex-col gap-4 p-4 justify-center items-center ">
         {models.map((item, index) => (
-          <SelectCard models={item} />
+          <SelectCard models={item} setModels={setModels} />
         ))}
       </div>
 
