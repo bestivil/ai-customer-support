@@ -2,9 +2,7 @@
 
 import { Textarea } from "@/components/ui/textarea";
 import SelectCard, { BaseCard } from "./elements/shadcn_card";
-import { useEffect, useState } from "react";
-import { Panels } from "./elements/panel";
-import { Box_Shadcn } from "./elements/box_shadcn";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import {
@@ -43,23 +41,31 @@ export default function Home() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let result = "";
-      return reader.read().then(function processText({ done, value }) {
-        if (done) {
-          return result;
-        }
-        const text = decoder.decode(value || new Uint8Array(), {
-          stream: true,
+      return reader
+        .read()
+        .then(function processText({
+          done,
+          value,
+        }: {
+          done: boolean;
+          value?: Uint8Array;
+        }): Promise<string> {
+          if (done) {
+            return Promise.resolve(result);
+          }
+          const text = decoder.decode(value || new Uint8Array(), {
+            stream: true,
+          });
+          setMessages((messages) => {
+            let lastMessage = messages[messages.length - 1];
+            let otherMessages = messages.slice(0, messages.length - 1);
+            return [
+              ...otherMessages,
+              { ...lastMessage, content: lastMessage.content + text },
+            ];
+          });
+          return reader.read().then(processText);
         });
-        setMessages((messages) => {
-          let lastMessage = messages[messages.length - 1];
-          let otherMessages = messages.slice(0, messages.length - 1);
-          return [
-            ...otherMessages,
-            { ...lastMessage, content: lastMessage.content + text },
-          ];
-        });
-        return reader.read().then(processText);
-      });
     } else {
       setMessages(() => {
         let lastMessage = messages[messages.length - 1];
