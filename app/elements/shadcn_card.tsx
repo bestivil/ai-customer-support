@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/card";
 import { dformat } from "../util/datetime";
 
+import { InfoCircledIcon } from "@radix-ui/react-icons";
+
 interface Model {
   name: string;
   active: boolean;
@@ -53,10 +55,12 @@ export function BaseCard({
   cn,
   msg,
   size,
+  isHistory = false,
 }: {
   cn: string;
   msg: { role?: string; content: string };
   size?: string;
+  isHistory?: boolean;
 }) {
   return (
     <div
@@ -66,10 +70,9 @@ export function BaseCard({
       )}
     >
       <Card className={size}>
-        <CardHeader className=" flex flex-col items-center justify-center text-center">
-          <CardContent className="">
-            <p className="">{msg.content}</p>
-          </CardContent>
+        <CardHeader className=" flex flex-col gap-3 md:flex-row items-center justify-center text-center">
+          <p className="">{msg.content}</p>
+          {isHistory ? <InfoCircledIcon className="justify-end" /> : undefined}
         </CardHeader>
       </Card>
     </div>

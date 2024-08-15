@@ -148,7 +148,16 @@ export default function Home() {
       >
         <ResizablePanel defaultSize={25}>
           <div className="flex flex-col h-full items-center justify-start p-6">
-            <div className="font-semibold">Chat History</div>
+            <div className="font-semibold mb-4">Chat History</div>
+            {chatHistory.map((item, index) => (
+              <BaseCard
+                key={index}
+                cn={"mt-3 top-0 "}
+                size=" bg-slate-100"
+                msg={{ content: item.key }}
+                isHistory={true}
+              />
+            ))}
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
