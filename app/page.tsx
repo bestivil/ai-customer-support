@@ -24,6 +24,9 @@ export default function Home() {
   const [newMsg, setNewMsg] = useState<string>();
   const [chatDate, setChatDate] = useState<any>();
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [chatHistory, setChatHistory] = useState<{ key: string; value: any }[]>(
+    []
+  );
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     [
       {
@@ -34,10 +37,45 @@ export default function Home() {
   );
 
   useEffect(() => {
-    setChatDate(dformat);
+    if (!chatDate) {
+      setChatDate(dformat);
+    }
+    // store.setItem();
+  }, [messages]);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const history: { key: string; value: any }[] = []; // TODO: update
+      await store.iterate(function (value, key) {
+        if (key === undefined || value === undefined) {
+          return;
+        }
+
+        const isValidDateFormat = /^\d{1,2}\/\d{1,2}\/\d{4} \d{2}:\d{2}$/.test(
+          key
+        );
+        if (!isValidDateFormat) {
+          return;
+        }
+
+        const existingItem = history.find((item) => item.key === key);
+        if (existingItem) {
+          if (existingItem.value === value) {
+            return;
+          }
+        } else {
+          history.push({ key, value });
+        }
+      });
+      setChatHistory(history);
+    };
+
+    fetchHistory();
   }, []);
 
-  useEffect(() => {});
+  useEffect(() => {
+    console.log(chatHistory);
+  }, [chatHistory]);
 
   const sendMessage = async () => {
     const res = await fetch("/api/chat", {
@@ -119,7 +157,7 @@ export default function Home() {
             <div className="mb-8">
               <BaseCard
                 cn={"mt-3 top-0 "}
-                size=" bg-slate-100 w-fit h-16 font-bold"
+                size=" bg-slate-100 w-fit h-16 font-bold rounded-full items-center "
                 msg={{ content: chatDate }}
               />
             </div>

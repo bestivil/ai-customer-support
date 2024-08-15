@@ -66,9 +66,9 @@ export function BaseCard({
       )}
     >
       <Card className={size}>
-        <CardHeader className="justify-between flex flex-row">
-          <CardContent>
-            <p>{msg.content}</p>
+        <CardHeader className=" flex flex-col items-center justify-center text-center">
+          <CardContent className="">
+            <p className="">{msg.content}</p>
           </CardContent>
         </CardHeader>
       </Card>
